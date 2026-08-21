@@ -1,0 +1,478 @@
+[
+  {
+    "id": "naming-verbosity-ts-1",
+    "axis": "naming",
+    "varies": "identifier verbosity",
+    "language": "typescript",
+    "left": {
+      "label": "Terse names",
+      "code": "function flatten<T>(xs: T[][]): T[] {\n  const out: T[] = [];\n  for (const x of xs) {\n    for (const y of x) out.push(y);\n  }\n  return out;\n}",
+      "signals": [
+        {
+          "questionId": "naming.verbosity",
+          "answer": {
+            "kind": "spectrum",
+            "value": 1
+          },
+          "weight": 1
+        }
+      ]
+    },
+    "right": {
+      "label": "Descriptive names",
+      "code": "function flatten<TItem>(arrayOfArrays: TItem[][]): TItem[] {\n  const flattenedItems: TItem[] = [];\n  for (const inner of arrayOfArrays) {\n    for (const item of inner) flattenedItems.push(item);\n  }\n  return flattenedItems;\n}",
+      "signals": [
+        {
+          "questionId": "naming.verbosity",
+          "answer": {
+            "kind": "spectrum",
+            "value": 3
+          },
+          "weight": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "naming-acronyms-ts-1",
+    "axis": "naming",
+    "varies": "acronym casing inside identifiers",
+    "language": "typescript",
+    "left": {
+      "label": "All-caps acronyms",
+      "code": "function parseURL(input: string): URL {\n  const parsed = new URL(input);\n  return parsed;\n}\n\nfunction fetchHTTP(target: URL): Promise<HTTPResponse> {\n  return doFetch(target);\n}",
+      "signals": [
+        {
+          "questionId": "naming.acronyms",
+          "answer": {
+            "kind": "single-choice",
+            "value": "all-caps"
+          },
+          "weight": 1
+        }
+      ]
+    },
+    "right": {
+      "label": "Title-cased acronyms",
+      "code": "function parseUrl(input: string): Url {\n  const parsed = new Url(input);\n  return parsed;\n}\n\nfunction fetchHttp(target: Url): Promise<HttpResponse> {\n  return doFetch(target);\n}",
+      "signals": [
+        {
+          "questionId": "naming.acronyms",
+          "answer": {
+            "kind": "single-choice",
+            "value": "title-case"
+          },
+          "weight": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "naming-booleans-ts-1",
+    "axis": "naming",
+    "varies": "boolean variable naming",
+    "language": "typescript",
+    "left": {
+      "label": "is/has/can prefixes",
+      "code": "const isReady = user.ready && user.email.verified;\nconst hasUnread = inbox.unread.length > 0;\nconst canEdit = user.role === 'admin';\nif (isReady && hasUnread && canEdit) {\n  showInbox();\n}",
+      "signals": [
+        {
+          "questionId": "naming.booleans",
+          "answer": {
+            "kind": "single-choice",
+            "value": "is-prefix"
+          },
+          "weight": 1
+        }
+      ]
+    },
+    "right": {
+      "label": "Bare adjectives",
+      "code": "const ready = user.ready && user.email.verified;\nconst unread = inbox.unread.length > 0;\nconst editable = user.role === 'admin';\nif (ready && unread && editable) {\n  showInbox();\n}",
+      "signals": [
+        {
+          "questionId": "naming.booleans",
+          "answer": {
+            "kind": "single-choice",
+            "value": "descriptive"
+          },
+          "weight": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "naming-verbosity-py-1",
+    "axis": "naming",
+    "varies": "identifier verbosity (Python)",
+    "language": "python",
+    "left": {
+      "label": "Terse names",
+      "code": "def merge(a, b):\n    out = {}\n    for k, v in a.items():\n        out[k] = v\n    for k, v in b.items():\n        out[k] = v\n    return out",
+      "signals": [
+        {
+          "questionId": "naming.verbosity",
+          "answer": {
+            "kind": "spectrum",
+            "value": 1
+          },
+          "weight": 1
+        }
+      ]
+    },
+    "right": {
+      "label": "Descriptive names",
+      "code": "def merge_dicts(first_dict, second_dict):\n    merged_result = {}\n    for key, value in first_dict.items():\n        merged_result[key] = value\n    for key, value in second_dict.items():\n        merged_result[key] = value\n    return merged_result",
+      "signals": [
+        {
+          "questionId": "naming.verbosity",
+          "answer": {
+            "kind": "spectrum",
+            "value": 3
+          },
+          "weight": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "comments-trigger-ts-1",
+    "axis": "comments",
+    "varies": "comments on a public function",
+    "language": "typescript",
+    "left": {
+      "label": "No docstring, code speaks",
+      "code": "export function debounce<T extends (...args: never[]) => unknown>(\n  fn: T,\n  ms: number,\n): (...args: Parameters<T>) => void {\n  let handle: ReturnType<typeof setTimeout> | null = null;\n  return (...args) => {\n    if (handle !== null) clearTimeout(handle);\n    handle = setTimeout(() => fn(...args), ms);\n  };\n}",
+      "signals": [
+        {
+          "questionId": "comments.trigger",
+          "answer": {
+            "kind": "single-choice",
+            "value": "minimal"
+          },
+          "weight": 1
+        }
+      ]
+    },
+    "right": {
+      "label": "Docstring on the public API",
+      "code": "/**\n * Returns a debounced wrapper around `fn` that only fires after\n * `ms` milliseconds have elapsed since the last call.\n *\n * @param fn  The function to debounce.\n * @param ms  Delay in milliseconds.\n */\nexport function debounce<T extends (...args: never[]) => unknown>(\n  fn: T,\n  ms: number,\n): (...args: Parameters<T>) => void {\n  let handle: ReturnType<typeof setTimeout> | null = null;\n  return (...args) => {\n    if (handle !== null) clearTimeout(handle);\n    handle = setTimeout(() => fn(...args), ms);\n  };\n}",
+      "signals": [
+        {
+          "questionId": "comments.trigger",
+          "answer": {
+            "kind": "single-choice",
+            "value": "docstrings"
+          },
+          "weight": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "comments-density-ts-1",
+    "axis": "comments",
+    "varies": "inline comment density",
+    "language": "typescript",
+    "left": {
+      "label": "Comment-free",
+      "code": "function settle<T>(promises: Promise<T>[]): Promise<T[]> {\n  return Promise.all(\n    promises.map((p) =>\n      p.catch(() => null as unknown as T),\n    ),\n  ).then((results) => results.filter((r) => r !== null));\n}",
+      "signals": [
+        {
+          "questionId": "comments.density",
+          "answer": {
+            "kind": "spectrum",
+            "value": 1
+          },
+          "weight": 1
+        }
+      ]
+    },
+    "right": {
+      "label": "Annotated step-by-step",
+      "code": "function settle<T>(promises: Promise<T>[]): Promise<T[]> {\n  // Wrap each promise so a single rejection doesn't take down the batch.\n  const safe = promises.map((p) =>\n    p.catch(() => null as unknown as T),\n  );\n  // Wait for everyone to land, then drop the rejected slots.\n  return Promise.all(safe).then((results) => {\n    // null sentinels mark the failures we swallowed above.\n    return results.filter((r) => r !== null);\n  });\n}",
+      "signals": [
+        {
+          "questionId": "comments.density",
+          "answer": {
+            "kind": "spectrum",
+            "value": 3
+          },
+          "weight": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "functions-size-ts-1",
+    "axis": "functions",
+    "varies": "function size (one big vs several small)",
+    "language": "typescript",
+    "left": {
+      "label": "One cohesive function",
+      "code": "function publishPost(post: Post): PublishedPost {\n  if (!post.title) throw new Error('title required');\n  if (!post.body) throw new Error('body required');\n  const slug = post.title\n    .toLowerCase()\n    .replace(/[^a-z0-9]+/g, '-')\n    .replace(/^-|-$/g, '');\n  const html = renderMarkdown(post.body);\n  const summary = post.body.slice(0, 200);\n  return {\n    ...post,\n    slug,\n    html,\n    summary,\n    publishedAt: new Date().toISOString(),\n  };\n}",
+      "signals": [
+        {
+          "questionId": "functions.size",
+          "answer": {
+            "kind": "spectrum",
+            "value": 3
+          },
+          "weight": 1
+        }
+      ]
+    },
+    "right": {
+      "label": "Split into small helpers",
+      "code": "function publishPost(post: Post): PublishedPost {\n  validate(post);\n  return {\n    ...post,\n    slug: slugify(post.title),\n    html: renderMarkdown(post.body),\n    summary: post.body.slice(0, 200),\n    publishedAt: new Date().toISOString(),\n  };\n}\n\nfunction validate(post: Post): void {\n  if (!post.title) throw new Error('title required');\n  if (!post.body) throw new Error('body required');\n}\n\nfunction slugify(title: string): string {\n  return title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');\n}",
+      "signals": [
+        {
+          "questionId": "functions.size",
+          "answer": {
+            "kind": "spectrum",
+            "value": 1
+          },
+          "weight": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "functions-early-return-ts-1",
+    "axis": "functions",
+    "varies": "early returns vs nested else",
+    "language": "typescript",
+    "left": {
+      "label": "Guard clauses + early returns",
+      "code": "function authorize(user: User, action: Action): boolean {\n  if (!user) return false;\n  if (user.banned) return false;\n  if (action.kind === 'read') return true;\n  if (!user.verified) return false;\n  return user.roles.includes(action.requiredRole);\n}",
+      "signals": [
+        {
+          "questionId": "functions.early-return",
+          "answer": {
+            "kind": "single-choice",
+            "value": "early-return"
+          },
+          "weight": 1
+        }
+      ]
+    },
+    "right": {
+      "label": "Single exit, nested ifs",
+      "code": "function authorize(user: User, action: Action): boolean {\n  let allowed = false;\n  if (user) {\n    if (!user.banned) {\n      if (action.kind === 'read') {\n        allowed = true;\n      } else if (user.verified) {\n        allowed = user.roles.includes(action.requiredRole);\n      }\n    }\n  }\n  return allowed;\n}",
+      "signals": [
+        {
+          "questionId": "functions.early-return",
+          "answer": {
+            "kind": "single-choice",
+            "value": "single-exit"
+          },
+          "weight": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "functions-nesting-py-1",
+    "axis": "functions",
+    "varies": "control-flow nesting depth",
+    "language": "python",
+    "left": {
+      "label": "Flat (early returns)",
+      "code": "def find_owner(repo, user_id):\n    if repo is None:\n        return None\n    if user_id is None:\n        return None\n    owner = repo.owners.get(user_id)\n    if owner is None:\n        return None\n    if owner.active is False:\n        return None\n    return owner",
+      "signals": [
+        {
+          "questionId": "functions.nesting-tolerance",
+          "answer": {
+            "kind": "spectrum",
+            "value": 1
+          },
+          "weight": 1
+        }
+      ]
+    },
+    "right": {
+      "label": "Deeply nested",
+      "code": "def find_owner(repo, user_id):\n    if repo is not None:\n        if user_id is not None:\n            owner = repo.owners.get(user_id)\n            if owner is not None:\n                if owner.active is not False:\n                    return owner\n    return None",
+      "signals": [
+        {
+          "questionId": "functions.nesting-tolerance",
+          "answer": {
+            "kind": "spectrum",
+            "value": 3
+          },
+          "weight": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "errors-style-ts-1",
+    "axis": "errors",
+    "varies": "throw vs Result type",
+    "language": "typescript",
+    "left": {
+      "label": "Throw exceptions",
+      "code": "function parseAge(input: string): number {\n  const n = Number(input);\n  if (Number.isNaN(n) || n < 0) {\n    throw new Error(`invalid age: ${input}`);\n  }\n  return n;\n}\n\n// Caller:\nconst age = parseAge(raw);",
+      "signals": [
+        {
+          "questionId": "errors.style",
+          "answer": {
+            "kind": "single-choice",
+            "value": "throw"
+          },
+          "weight": 1
+        }
+      ]
+    },
+    "right": {
+      "label": "Return a Result type",
+      "code": "type Result<T> = { ok: true; value: T } | { ok: false; error: string };\n\nfunction parseAge(input: string): Result<number> {\n  const n = Number(input);\n  if (Number.isNaN(n) || n < 0) {\n    return { ok: false, error: `invalid age: ${input}` };\n  }\n  return { ok: true, value: n };\n}\n\n// Caller:\nconst r = parseAge(raw);\nif (!r.ok) return r;\nconst age = r.value;",
+      "signals": [
+        {
+          "questionId": "errors.style",
+          "answer": {
+            "kind": "single-choice",
+            "value": "result-type"
+          },
+          "weight": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "errors-style-py-1",
+    "axis": "errors",
+    "varies": "raise vs (err, value) tuple",
+    "language": "python",
+    "left": {
+      "label": "Raise on invalid input",
+      "code": "def parse_age(raw: str) -> int:\n    n = int(raw)\n    if n < 0:\n        raise ValueError(f\"invalid age: {raw}\")\n    return n\n\n# Caller:\nage = parse_age(raw)",
+      "signals": [
+        {
+          "questionId": "errors.style",
+          "answer": {
+            "kind": "single-choice",
+            "value": "throw"
+          },
+          "weight": 1
+        }
+      ]
+    },
+    "right": {
+      "label": "Return (error, value) tuples",
+      "code": "def parse_age(raw: str) -> tuple[str | None, int | None]:\n    try:\n        n = int(raw)\n    except ValueError:\n        return (f\"invalid age: {raw}\", None)\n    if n < 0:\n        return (f\"invalid age: {raw}\", None)\n    return (None, n)\n\n# Caller:\nerr, age = parse_age(raw)\nif err is not None:\n    return err",
+      "signals": [
+        {
+          "questionId": "errors.style",
+          "answer": {
+            "kind": "single-choice",
+            "value": "tuple"
+          },
+          "weight": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "errors-custom-types-ts-1",
+    "axis": "errors",
+    "varies": "generic vs custom error types",
+    "language": "typescript",
+    "left": {
+      "label": "Generic Error",
+      "code": "function loadUser(id: string): User {\n  const user = db.users.get(id);\n  if (!user) throw new Error(`user not found: ${id}`);\n  if (user.deleted) throw new Error(`user deleted: ${id}`);\n  return user;\n}",
+      "signals": [
+        {
+          "questionId": "errors.custom-types",
+          "answer": {
+            "kind": "single-choice",
+            "value": "none"
+          },
+          "weight": 1
+        }
+      ]
+    },
+    "right": {
+      "label": "Custom error classes per mode",
+      "code": "class UserNotFoundError extends Error {\n  constructor(public readonly id: string) {\n    super(`user not found: ${id}`);\n  }\n}\nclass UserDeletedError extends Error {\n  constructor(public readonly id: string) {\n    super(`user deleted: ${id}`);\n  }\n}\n\nfunction loadUser(id: string): User {\n  const user = db.users.get(id);\n  if (!user) throw new UserNotFoundError(id);\n  if (user.deleted) throw new UserDeletedError(id);\n  return user;\n}",
+      "signals": [
+        {
+          "questionId": "errors.custom-types",
+          "answer": {
+            "kind": "single-choice",
+            "value": "rich"
+          },
+          "weight": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "errors-swallow-ts-1",
+    "axis": "errors",
+    "varies": "silently catching errors",
+    "language": "typescript",
+    "left": {
+      "label": "Best-effort, swallowed",
+      "code": "async function pingCache(): Promise<void> {\n  try {\n    await cache.ping();\n  } catch {\n    // best-effort; ignore failures\n  }\n}",
+      "signals": [
+        {
+          "questionId": "errors.swallow",
+          "answer": {
+            "kind": "single-choice",
+            "value": "context-dependent"
+          },
+          "weight": 1
+        }
+      ]
+    },
+    "right": {
+      "label": "Log even when ignored",
+      "code": "async function pingCache(): Promise<void> {\n  try {\n    await cache.ping();\n  } catch (err) {\n    logger.warn('cache ping failed', { err });\n  }\n}",
+      "signals": [
+        {
+          "questionId": "errors.swallow",
+          "answer": {
+            "kind": "single-choice",
+            "value": "never"
+          },
+          "weight": 1
+        }
+      ]
+    }
+  },
+  {
+    "id": "errors-catch-granularity-ts-1",
+    "axis": "errors",
+    "varies": "try/catch granularity",
+    "language": "typescript",
+    "left": {
+      "label": "Tight wrap on one call",
+      "code": "function importFile(path: string): Imported {\n  const raw = readFileSync(path, 'utf8');\n  let parsed: unknown;\n  try {\n    parsed = JSON.parse(raw);\n  } catch (err) {\n    throw new Error(`bad JSON in ${path}: ${(err as Error).message}`);\n  }\n  return validate(parsed);\n}",
+      "signals": [
+        {
+          "questionId": "errors.catch-granularity",
+          "answer": {
+            "kind": "spectrum",
+            "value": 1
+          },
+          "weight": 1
+        }
+      ]
+    },
+    "right": {
+      "label": "Wrap the whole function body",
+      "code": "function importFile(path: string): Imported {\n  try {\n    const raw = readFileSync(path, 'utf8');\n    const parsed = JSON.parse(raw);\n    return validate(parsed);\n  } catch (err) {\n    throw new Error(`import failed for ${path}: ${(err as Error).message}`);\n  }\n}",
+      "signals": [
+        {
+          "questionId": "errors.catch-granularity",
+          "answer": {
+            "kind": "spectrum",
+            "value": 3
+          },
+          "weight": 1
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,52 @@
+[
+  {
+    "id": "explain-concept",
+    "kind": "prose",
+    "title": "Explain a concept",
+    "instruction": "Pick a technical concept you know well (e.g. closures, DNS, database indexes) and explain it to a new teammate the way you actually would, in your own words, at your natural level of detail.",
+    "placeholder": "So the way I think about closures is…",
+    "minChars": 200
+  },
+  {
+    "id": "casual-update",
+    "kind": "prose",
+    "title": "Casual team message",
+    "instruction": "Write the chat message you would send your team after spending an afternoon tracking down a nasty bug that turned out to be a timezone issue. Write it exactly as you would in Slack/Discord, abbreviations, emoji, whatever is natural for you.",
+    "placeholder": "ok so. found it.",
+    "minChars": 80
+  },
+  {
+    "id": "readme-intro",
+    "kind": "prose",
+    "title": "README introduction",
+    "instruction": "Write the opening section of a README for a small side project of yours (real or invented): what it is, why it exists, and how to get started. Write it the way you would actually publish it.",
+    "placeholder": "# my-project\n\n…",
+    "minChars": 200
+  },
+  {
+    "id": "docstring",
+    "kind": "code-doc",
+    "title": "Write a docstring",
+    "instruction": "Write the docstring/doc comment you would put on this function, in whatever style and length you normally use.",
+    "material": "function retryFetch(url, options, maxAttempts = 3, baseDelayMs = 250) {\n  // fetches url, retrying on network errors and 5xx responses\n  // with exponential backoff; throws after maxAttempts failures\n}",
+    "placeholder": "/** … */",
+    "minChars": 60
+  },
+  {
+    "id": "inline-comments",
+    "kind": "code-doc",
+    "title": "Comment some code",
+    "instruction": "Copy this snippet and add inline comments exactly where (and only where) you would in real code. If you would leave it uncommented, say so and explain your bar for commenting.",
+    "material": "function dedupeEvents(events) {\n  const seen = new Map();\n  for (const e of events) {\n    const key = `${e.type}:${e.entityId}`;\n    const prev = seen.get(key);\n    if (!prev || e.timestamp > prev.timestamp) {\n      seen.set(key, e);\n    }\n  }\n  return [...seen.values()].sort((a, b) => a.timestamp - b.timestamp);\n}",
+    "placeholder": "function dedupeEvents(events) {\n  …",
+    "minChars": 100
+  },
+  {
+    "id": "commit-and-pr",
+    "kind": "code-doc",
+    "title": "Commit message & PR description",
+    "instruction": "You just fixed the timezone bug from earlier: server logs were grouped by UTC day while the dashboard grouped by local day, so daily counts disagreed. Write the commit message and the short PR description you would actually write.",
+    "placeholder": "fix: …\n\n---\n\nPR description…",
+    "minChars": 100
+  }
+]

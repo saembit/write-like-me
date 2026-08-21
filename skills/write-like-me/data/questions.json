@@ -1,0 +1,370 @@
+[
+  {
+    "kind": "spectrum",
+    "id": "naming.verbosity",
+    "axis": "naming",
+    "prompt": "How verbose should identifier names be?",
+    "helper": "A loop index inside a 5-line function vs. a variable that lives across a 200-line module.",
+    "leftLabel": "Terse (i, ctx, req)",
+    "rightLabel": "Descriptive (iteratorIndex, requestContext)",
+    "steps": 5,
+    "prose": [
+      "I prefer short, terse identifiers. Loop indices are `i`, contexts are `ctx`, requests are `req`. Names get longer only when scope demands it.",
+      "I lean terse. Short names for short-lived locals, longer names for cross-module things. Don't bloat names just to be self-documenting.",
+      "I match name length to scope: terse for short-lived locals, descriptive for anything that crosses function or module boundaries.",
+      "I lean descriptive. I'd rather see `requestContext` than `ctx` in most places, but a 3-line loop can still use `i`.",
+      "I want fully descriptive names everywhere. `iteratorIndex` over `i`, `requestContext` over `ctx`. Names should read like prose."
+    ],
+    "glance": [
+      "Names lean terse, `i`, `ctx`, `req` are fine.",
+      "Names lean terse for locals; longer for cross-boundary things.",
+      "",
+      "Names lean descriptive.",
+      "Names are fully descriptive, no single-letter or abbreviated identifiers."
+    ]
+  },
+  {
+    "kind": "single-choice",
+    "id": "naming.acronyms",
+    "axis": "naming",
+    "prompt": "How do you case acronyms inside identifiers?",
+    "choices": [
+      {
+        "value": "all-caps",
+        "label": "parseURL, fetchHTTP",
+        "description": "Acronyms stay uppercase.",
+        "prose": "Acronyms stay fully uppercase inside identifiers: `parseURL`, `fetchHTTP`, `userID`.",
+        "glance": "Acronyms stay UPPERCASE inside identifiers.",
+        "avoids": "Don't title-case acronyms (no `parseUrl`, `fetchHttp`)."
+      },
+      {
+        "value": "title-case",
+        "label": "parseUrl, fetchHttp",
+        "description": "Acronyms are treated like normal words.",
+        "prose": "Acronyms are title-cased like normal words: `parseUrl`, `fetchHttp`, `userId`.",
+        "glance": "Acronyms are Title-Cased (parseUrl, not parseURL).",
+        "avoids": "Don't leave acronyms all-caps inside camelCase identifiers."
+      },
+      {
+        "value": "context-dependent",
+        "label": "It depends",
+        "description": "Long acronyms title-case; short ones (ID, OK) stay uppercase.",
+        "prose": "Acronym casing depends on length: short ones like `ID`, `OK`, `IO` stay uppercase; longer ones like `HTTP`, `JSON` get title-cased to `Http`, `Json`."
+      }
+    ]
+  },
+  {
+    "kind": "single-choice",
+    "id": "naming.booleans",
+    "axis": "naming",
+    "prompt": "How do you name boolean variables?",
+    "choices": [
+      {
+        "value": "is-prefix",
+        "label": "`isReady`, `hasItems`, `canEdit`",
+        "prose": "Booleans use `is`/`has`/`can`/`should` prefixes: `isReady`, `hasItems`, `canEdit`, `shouldRetry`.",
+        "glance": "Booleans use is/has/can prefixes."
+      },
+      {
+        "value": "descriptive",
+        "label": "`ready`, `dirty`, `editable`",
+        "prose": "Booleans use adjective-style names without prefixes: `ready`, `dirty`, `editable`, `pending`.",
+        "glance": "Booleans are bare adjectives, no `is`/`has` prefix."
+      },
+      {
+        "value": "mixed",
+        "label": "Whichever reads more naturally in context",
+        "prose": "Boolean names follow whichever reads more naturally. `dirty` is fine on its own; `isAuthenticated` makes sense when there's no shorter alternative."
+      }
+    ]
+  },
+  {
+    "kind": "single-choice",
+    "id": "comments.trigger",
+    "axis": "comments",
+    "prompt": "When do you reach for a comment?",
+    "choices": [
+      {
+        "value": "why-only",
+        "label": "Only when the *why* is non-obvious",
+        "description": "Code explains what; comments explain why.",
+        "prose": "Comments explain *why*, not *what*. Add one only when the reason isn't obvious from the code, a workaround, a non-obvious constraint, a subtle invariant.",
+        "glance": "Comment only when the **why** is non-obvious.",
+        "avoids": "Don't add comments that restate what the code already says."
+      },
+      {
+        "value": "docstrings",
+        "label": "Docstrings on public APIs, sparingly inline",
+        "description": "Top-of-function explanations, otherwise let the code speak.",
+        "prose": "Public APIs get docstrings (purpose, params, return). Inline comments are reserved for the truly surprising. Internal helpers usually don't need either.",
+        "glance": "Docstrings on public APIs; sparing inline comments."
+      },
+      {
+        "value": "heavy",
+        "label": "Liberally, future-me will thank present-me",
+        "description": "Section headers, intent, non-obvious choices, all documented.",
+        "prose": "Comment liberally. Section headers, intent at the top of non-trivial functions, notes on why a particular approach was chosen, all useful for future readers.",
+        "glance": "Comment liberally, section headers, intent, rationale."
+      },
+      {
+        "value": "minimal",
+        "label": "Almost never, well-named code is the comment",
+        "prose": "Comments are rare. Good names and clear structure should make the code self-explanatory. If a comment seems needed, that's usually a signal to refactor instead.",
+        "glance": "Comments almost never, refactor for clarity instead.",
+        "avoids": "Don't add comments, improve the code instead."
+      }
+    ]
+  },
+  {
+    "kind": "spectrum",
+    "id": "comments.density",
+    "axis": "comments",
+    "prompt": "How dense are comments in code you write?",
+    "leftLabel": "Bare (1 comment per 100+ lines)",
+    "rightLabel": "Heavy (multiple per function)",
+    "steps": 5,
+    "prose": [
+      "My code is nearly comment-free, maybe one comment per hundred lines or so.",
+      "Comments are sparse, one or two per file, mostly on the trickiest spots.",
+      "Comment density is moderate, most non-trivial functions have one or two comments.",
+      "I comment fairly densely, most functions have at least one explanatory comment.",
+      "My code is heavily commented, multiple comments per function, often with section headers."
+    ]
+  },
+  {
+    "kind": "single-choice",
+    "id": "comments.todo-style",
+    "axis": "comments",
+    "prompt": "Are TODO/FIXME comments OK in committed code?",
+    "choices": [
+      {
+        "value": "yes-tracked",
+        "label": "Yes, if they reference a ticket (TODO(#1234): …)",
+        "prose": "TODO/FIXME comments are fine but must reference an issue: `TODO(#1234): …`.",
+        "avoids": "Don't leave untracked TODOs, link them to an issue."
+      },
+      {
+        "value": "yes-freeform",
+        "label": "Yes, freeform, track it in your head",
+        "prose": "Freeform TODO/FIXME comments are fine without any tracking link."
+      },
+      {
+        "value": "no",
+        "label": "No, either fix it now or open a real ticket",
+        "prose": "No TODO/FIXME comments in committed code. Either fix it now or open a real issue and link it from the PR.",
+        "glance": "No TODO/FIXME comments in committed code.",
+        "avoids": "Don't leave TODO or FIXME comments, fix or file an issue."
+      }
+    ]
+  },
+  {
+    "kind": "spectrum",
+    "id": "functions.size",
+    "axis": "functions",
+    "prompt": "Preferred function size?",
+    "helper": "Length you reach for *first* before extracting.",
+    "leftLabel": "Many small (≤ 15 lines)",
+    "rightLabel": "Fewer larger (50+ lines OK)",
+    "steps": 5,
+    "prose": [
+      "Functions stay small, 15 lines or fewer. I extract aggressively the moment a function grows.",
+      "I prefer small functions, typically under 25 lines. Slightly bigger is fine if the body is cohesive.",
+      "Function size is moderate, usually 20-40 lines. I extract when a function does more than one thing, not based on line count.",
+      "Functions can run longer, 40-60 lines is fine when the work belongs together.",
+      "Long functions are fine when the work is cohesive. I'd rather have a clear 80-line function than five tiny helpers no one will recognize."
+    ],
+    "glance": [
+      "Functions stay small (≤ 15 lines).",
+      "Functions stay small (~ 25 lines).",
+      "",
+      "Functions can run 40-60 lines when cohesive.",
+      "Long functions are fine when cohesive, don't shred for size."
+    ]
+  },
+  {
+    "kind": "single-choice",
+    "id": "functions.early-return",
+    "axis": "functions",
+    "prompt": "Early returns vs. single-exit functions?",
+    "choices": [
+      {
+        "value": "early-return",
+        "label": "Guard clauses + early returns",
+        "description": "Bail out fast, keep the happy path flat.",
+        "prose": "Early returns and guard clauses keep the happy path flat. Bail out fast on invalid input or special cases.",
+        "glance": "Use guard clauses + early returns; keep the happy path flat.",
+        "avoids": "Don't nest the happy path inside `else` branches."
+      },
+      {
+        "value": "single-exit",
+        "label": "One return at the bottom",
+        "description": "Easier to reason about and to refactor.",
+        "prose": "Functions have a single return at the bottom. Easier to reason about cleanup and to add tracing.",
+        "avoids": "Don't scatter returns through guard clauses."
+      },
+      {
+        "value": "mixed",
+        "label": "Mixed, whichever reads better per function",
+        "prose": "Mix early returns and single-exit based on what reads better for the specific function. Validation guards at the top, then a clear linear flow."
+      }
+    ]
+  },
+  {
+    "kind": "single-choice",
+    "id": "functions.extraction-threshold",
+    "axis": "functions",
+    "prompt": "When do you extract a helper function?",
+    "choices": [
+      {
+        "value": "rule-of-two",
+        "label": "On the second occurrence (rule of two)",
+        "prose": "Extract a helper on the second occurrence. Two copies is already one too many."
+      },
+      {
+        "value": "rule-of-three",
+        "label": "On the third occurrence (rule of three)",
+        "prose": "Wait for the third occurrence before extracting. Two similar lines beats a premature abstraction.",
+        "glance": "Wait for the rule of three before extracting helpers.",
+        "avoids": "Don't extract a helper on the second occurrence, wait for the third."
+      },
+      {
+        "value": "readability",
+        "label": "When it improves readability, regardless of reuse",
+        "prose": "Extract whenever it improves readability, even for a one-off. A well-named helper is worth more than reuse.",
+        "glance": "Extract for readability, not just reuse."
+      },
+      {
+        "value": "reuse-only",
+        "label": "Only when it will be reused outside the file",
+        "prose": "Only extract when the helper will be reused outside its file. Otherwise inline it where it lives.",
+        "avoids": "Don't extract single-use helpers unless they'll be reused across files."
+      }
+    ]
+  },
+  {
+    "kind": "spectrum",
+    "id": "functions.nesting-tolerance",
+    "axis": "functions",
+    "prompt": "How much nesting is too much?",
+    "leftLabel": "≤ 2 levels, then extract",
+    "rightLabel": "4+ levels fine if cohesive",
+    "steps": 5,
+    "prose": [
+      "Hard ceiling at two levels of nesting. Beyond that I extract or flatten with early returns.",
+      "I cap at two or three levels. Three is the usual signal to refactor.",
+      "Three levels is usually fine; four is the signal to flatten or extract.",
+      "Four levels is acceptable if the logic genuinely needs it.",
+      "Deep nesting is fine when the structure mirrors the problem."
+    ],
+    "glance": [
+      "Cap nesting at 2 levels.",
+      "Cap nesting at 2-3 levels.",
+      "",
+      "",
+      "Deep nesting is fine when problem-driven."
+    ]
+  },
+  {
+    "kind": "single-choice",
+    "id": "errors.style",
+    "axis": "errors",
+    "prompt": "Preferred way to surface failures?",
+    "choices": [
+      {
+        "value": "throw",
+        "label": "Throw exceptions",
+        "description": "Caller catches at the right layer. Standard for the language.",
+        "prose": "Surface failures by throwing exceptions. Let them propagate; catch at the layer that knows what to do.",
+        "glance": "Surface failures by throwing exceptions.",
+        "avoids": "Don't introduce Result/Either types into code that throws."
+      },
+      {
+        "value": "result-type",
+        "label": "Return a Result/Either type",
+        "description": "Errors are values; failure is part of the type signature.",
+        "prose": "Errors are values. Functions that can fail return a Result/Either type so failure shows up in the type signature.",
+        "glance": "Errors are values, return Result/Either, don't throw.",
+        "avoids": "Don't throw exceptions for expected failures."
+      },
+      {
+        "value": "tuple",
+        "label": "Return `[error, value]` tuples",
+        "description": "Go-style. Check before using the value.",
+        "prose": "Functions that can fail return `[error, value]` tuples (Go-style). Caller checks the error before using the value.",
+        "glance": "Return `[error, value]` tuples; check before using the value."
+      },
+      {
+        "value": "mixed",
+        "label": "Throw at boundaries, return values internally",
+        "prose": "Throw at module/system boundaries; return error values for internal flow. Boundary code converts between the two."
+      }
+    ]
+  },
+  {
+    "kind": "single-choice",
+    "id": "errors.custom-types",
+    "axis": "errors",
+    "prompt": "Do you define custom error classes/types?",
+    "choices": [
+      {
+        "value": "rich",
+        "label": "Yes, one per failure mode worth distinguishing",
+        "prose": "Each distinguishable failure mode gets its own error type. Callers can pattern-match without parsing message strings.",
+        "glance": "Define custom error types per failure mode."
+      },
+      {
+        "value": "few",
+        "label": "A few, domain errors get types, generic ones use built-ins",
+        "prose": "Domain-specific errors get their own types. Generic failures (I/O, network) use built-in error types with descriptive messages."
+      },
+      {
+        "value": "none",
+        "label": "Rarely, built-in error types + a message field is usually enough",
+        "prose": "Built-in error types with descriptive messages are usually enough. Custom error classes are over-engineering for most failures.",
+        "avoids": "Don't introduce custom error classes unless callers need to distinguish them."
+      }
+    ]
+  },
+  {
+    "kind": "spectrum",
+    "id": "errors.catch-granularity",
+    "axis": "errors",
+    "prompt": "How granular should try/catch blocks be?",
+    "leftLabel": "Tight, wrap the single failing call",
+    "rightLabel": "Loose, wrap the whole function",
+    "steps": 5,
+    "prose": [
+      "Try/catch blocks wrap the single line that can fail. Anything more is over-broad.",
+      "Try/catch blocks stay tight, wrap the smallest section that can throw.",
+      "Try/catch granularity is moderate: wrap the logical unit that can fail, not just one line.",
+      "Try/catch tends to wrap larger sections to keep the happy path uncluttered.",
+      "Try/catch usually wraps the whole function or major block. Centralize error handling."
+    ]
+  },
+  {
+    "kind": "single-choice",
+    "id": "errors.swallow",
+    "axis": "errors",
+    "prompt": "Catching and ignoring an error, ever OK?",
+    "choices": [
+      {
+        "value": "never",
+        "label": "Never, at minimum, log it",
+        "prose": "Never swallow errors silently. At minimum, log them with context.",
+        "glance": "Never swallow errors silently, at minimum, log them.",
+        "avoids": "Don't use empty catch blocks."
+      },
+      {
+        "value": "with-comment",
+        "label": "Only with a comment explaining why",
+        "prose": "Errors can be swallowed, but only with a comment explaining why ignoring this specific error is safe.",
+        "avoids": "Don't swallow errors without a comment explaining why."
+      },
+      {
+        "value": "context-dependent",
+        "label": "Sometimes, cleanup paths, best-effort retries",
+        "prose": "Some errors can be ignored, cleanup paths that already failed, best-effort retries, optional features. Use judgment."
+      }
+    ]
+  }
+]
