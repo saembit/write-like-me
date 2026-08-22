@@ -4,7 +4,7 @@ import { execFileSync } from 'node:child_process';
 import { mkdtempSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { extractComments, buildReport, renderText } from '../skills/write-like-me/scripts/collect-writing.mjs';
+import { extractComments, buildReport, renderText, looksAi, collectSamples } from '../skills/write-like-me/scripts/collect-writing.mjs';
 
 const SCRIPT = new URL('../skills/write-like-me/scripts/collect-writing.mjs', import.meta.url).pathname;
 
@@ -39,6 +39,11 @@ function makeRepo() {
     writeFileSync(join(dir, 'src', 'theirs.js'), '// Their comment, very formal.\nexport const x = 1;\n// Get the value if it exists\nexport const y = x;\n');
     git(['add', '.'], me);
     git(['commit', '-q', '-m', 'Add y'], me);
+
+    // A commit an AI wrote for me, should be skipped by default
+    writeFileSync(join(dir, 'src', 'ai.js'), 'export const z = 3;\n');
+    git(['add', '.'], me);
+    git(['commit', '-q', '-m', 'Refactor the module for clarity\n\nThis change improves maintainability.\n\nCo-Authored-By: Claude <noreply@anthropic.com>'], me);
     return dir;
 }
 
@@ -58,11 +63,12 @@ test('extractComments handles python hashes and docstrings', () => {
 
 test('buildReport filters to the author and uses blame when others have commits', () => {
     const dir = makeRepo();
-    const r = buildReport({ repo: dir, author: null, maxWords: 4000, json: true, blame: true });
+    const r = buildReport({ repo: dir, author: null, samples: [], maxWords: 4000, json: true, blame: true, keepAi: false });
     assert.equal(r.author, 'me@example.com');
-    assert.equal(r.share.mine, 2);
-    assert.equal(r.share.total, 3);
+    assert.equal(r.share.mine, 3);
+    assert.equal(r.share.total, 4);
     assert.equal(r.blameUsed, true);
+    assert.equal(r.aiSkipped, 1);
     // Commits: only mine, newest first, body kept
     assert.deepEqual(r.commits.map((c) => c.subject), ['Add y', 'Fix: env vars were read in in the wrong file']);
     assert.match(r.commits[1].body, /## Problem/);
@@ -75,6 +81,41 @@ test('buildReport filters to the author and uses blame when others have commits'
     assert.ok(!all.includes('Their comment'));
     assert.ok(r.words.commits > 0 && r.words.docs > 0 && r.words.comments > 0);
     assert.equal(r.enough, false, 'tiny repo is not enough evidence');
+});
+
+test('looksAi catches the usual trailers and leaves human messages alone', () => {
+    assert.equal(looksAi('Fix thing', 'Co-Authored-By: Claude <noreply@anthropic.com>'), true);
+    assert.equal(looksAi('Fix thing', 'Co-authored-by: GitHub Copilot <copilot@github.com>'), true);
+    assert.equal(looksAi('Fix thing', '🤖 Generated with [Claude Code](https://claude.com/claude-code)'), true);
+    assert.equal(looksAi('Fix thing', 'Claude-Session: https://claude.ai/code/session_x'), true);
+    assert.equal(looksAi('Fix thing', 'Co-Authored-By: Pat Human <pat@example.com>'), false);
+    assert.equal(looksAi('Add claude to the list of names', 'he is a friend'), false);
+});
+
+test('keep-ai keeps the AI commit and it shows in the list', () => {
+    const dir = makeRepo();
+    const r = buildReport({ repo: dir, author: 'me@example.com', samples: [], maxWords: 4000, json: true, blame: false, keepAi: true });
+    assert.equal(r.aiSkipped, 0);
+    assert.ok(r.commits.some((c) => c.subject === 'Refactor the module for clarity'));
+});
+
+test('samples are read from files and dirs, come first, and are never trimmed', () => {
+    const dir = makeRepo();
+    const sdir = mkdtempSync(join(tmpdir(), 'wlm-samples-'));
+    writeFileSync(join(sdir, 'one.txt'), 'Hey all, I just found the bug that was causing the OAuth flow to mess up.');
+    mkdirSync(join(sdir, 'more'));
+    writeFileSync(join(sdir, 'more', 'two.md'), '# Write Like Me\n\nIt may not be perfect but it\'s better than nothing.');
+    writeFileSync(join(sdir, '.hidden'), 'should be skipped');
+    const direct = collectSamples([sdir]);
+    assert.deepEqual(direct.map((x) => x.path.endsWith('one.txt') || x.path.endsWith('two.md')), [true, true]);
+    const r = buildReport({ repo: dir, author: 'me@example.com', samples: [sdir], maxWords: 10, json: true, blame: false, keepAi: false });
+    assert.equal(r.samples.length, 2);
+    assert.ok(r.words.samples > 10, 'samples ignore the word budget');
+    const text = renderText(r);
+    assert.ok(text.indexOf('==== Samples handed over by the user (2) ====') < text.indexOf('==== Commit messages'));
+    const out = execFileSync('node', [SCRIPT, dir, `--samples=${join(sdir, 'one.txt')},${join(sdir, 'more')}`], { encoding: 'utf8' });
+    assert.ok(out.includes('words: samples'));
+    assert.ok(out.includes('Hey all, I just found the bug'));
 });
 
 test('no-blame keeps everything in touched files', () => {
@@ -96,7 +137,7 @@ test('renderText has the section markers and cli prints it', () => {
     const dir = makeRepo();
     const r = buildReport({ repo: dir, author: 'me@example.com', maxWords: 4000, json: true, blame: true });
     const text = renderText(r);
-    assert.ok(text.includes('==== Commit messages (2) ===='));
+    assert.ok(text.includes('==== Commit messages (2) ===='), 'AI commit is not counted');
     assert.ok(text.includes('==== Docs (1) ===='));
     assert.ok(text.includes('==== Comments and docstrings'));
     const out = execFileSync('node', [SCRIPT, dir], { encoding: 'utf8' });

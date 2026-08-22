@@ -1,7 +1,7 @@
 ---
 name: write-like-me
 description: Build a style profile of how the user writes code, comments, docs and commit messages, then write it to CLAUDE.md, AGENTS.md, .cursorrules or a custom file so agents write like them. Use when the user asks to capture their style, make the agent sound like them, set up write-like-me, or refresh an existing profile.
-argument-hint: "[CLAUDE.md | AGENTS.md | .cursorrules | path] [refresh]"
+argument-hint: "[CLAUDE.md | AGENTS.md | .cursorrules | path] [samples=<file or dir>] [refresh]"
 ---
 
 # write-like-me
@@ -10,7 +10,7 @@ Goal: produce a markdown profile of how this person writes so that you (and othe
 
 Evidence first, questions second. The repo already has a lot of this person's real writing in it. Read that before asking them anything, and only ask about what the evidence can't settle.
 
-Arguments: anything that looks like a filename is a target file to write to. The word refresh forces the refresh path even if you'd otherwise start fresh. No arguments means ask.
+Arguments: anything that looks like a filename is a target file to write to. samples=<path> points at a file or dir of the user's own writing to use as evidence. The word refresh forces the refresh path even if you'd otherwise start fresh. No arguments means ask.
 
 # Files in this skill
 
@@ -21,7 +21,7 @@ Paths below are relative to this skill's own directory (the dir that holds this 
 - data/exercises.json, 6 short writing exercises (3 prose, 3 code documentation). Fallback for when the repo doesn't have enough of their writing.
 - data/style-analysis-prompt.md, the rubric for turning writing samples into a style report. Follow it when analyzing prose.
 - scripts/analyze-code.mjs, zero dependency heuristics. Run with node on a dir or files, get back comment density, function length, identifier length, acronym casing and suggested answers with confidence.
-- scripts/collect-writing.mjs, pulls the user's commit messages, docs, comments and docstrings out of git into one text blob, filtered to their author and blame when the repo has other people in it. Tells you up front whether there's enough to skip the exercises.
+- scripts/collect-writing.mjs, pulls the user's commit messages, docs, comments and docstrings out of git into one text blob, filtered to their author and blame when the repo has other people in it. Commits with AI trailers (Co-Authored-By Claude, Copilot, etc.) are dropped and counted. Takes --samples=<file or dir> for writing the user hands over themselves, which goes first and is never trimmed. Tells you up front whether there's enough to skip the exercises.
 - templates/CODE-STYLE.md and templates/WRITING-STYLE.md, the shape of the two output sections.
 
 # Flow
@@ -36,11 +36,14 @@ Paths below are relative to this skill's own directory (the dir that holds this 
    - Take each suggestion in the output as a draft answer. Keep its confidence.
    - Read a handful of their files yourself for the things the script can't see: early returns vs single exit, error handling shape, whether helpers get extracted, nesting depth. Draft answers for those too and be honest about confidence.
 
-3. Infer writing style from the repo
-   - Run node scripts/collect-writing.mjs <repo> and read the output. The header says how many words of commits, docs and comments it found and whether that's enough.
-   - If enough is yes, analyze the blob with data/style-analysis-prompt.md and skip the exercises.
-   - If enough is no, run the exercises from data/exercises.json in chat. Show one at a time, the instruction plus the material if there is one, and let them type. At least 2 completed, skipping is fine. Then analyze what they wrote plus whatever the script did find, using the rubric.
-   - Save what the user typed in the exercises as writingResponses keyed by exercise id. Repo evidence doesn't go in the sidecar, it's already in git.
+3. Infer writing style from the repo, or from the user
+   - Run node scripts/collect-writing.mjs <repo> (add --samples=<path> if they gave one) and read the output. The header says how many words of samples, commits, docs and comments it found, how many commits were skipped for AI trailers, and whether that's enough.
+   - Then ask one question before trusting any of it, because a repo that was mostly written by an AI will teach you the AI's voice, not theirs: how much of the writing in this repo is actually yours? Choices: mostly mine, use it / mixed, let me say which parts / mostly AI, don't use the repo / I'd rather give you samples. Skip this question if they already passed samples= or if the script found nothing.
+   - mostly mine: analyze the blob with data/style-analysis-prompt.md. If enough was no, run the exercises first (below) and analyze both.
+   - mixed: ask which kinds to trust (commits, docs, comments) and drop the others. If the repo has an obvious human written file (a README they wrote by hand, a notes file) let them name it and pass it as --samples.
+   - mostly AI or samples: ignore the repo blob except for what they point at. Get their own writing one of three ways, whichever they prefer: paste it in chat (a real Slack message, a README, an email, anything they wrote themselves), point at files or a dir on disk (rerun the script with --samples=<path>), or do the exercises. Two or three real samples of different kinds beat six exercises, say so.
+   - Exercises, when needed: run data/exercises.json in chat one at a time, the instruction plus the material if there is one, and let them type. At least 2 completed, skipping is fine. Then analyze with the rubric.
+   - Save what the user typed or pasted as writingResponses keyed by exercise id, or sample-1, sample-2 for pasted text. File paths they pointed at go under a samplePaths key so a refresh can reread them. Repo evidence doesn't go in the sidecar, it's already in git.
 
 4. Ask only what's left
    - For each question in data/questions.json that has no answer or a low confidence draft, ask the user. Show the draft and its rationale so they can just confirm.
@@ -61,7 +64,7 @@ Paths below are relative to this skill's own directory (the dir that holds this 
 When .write-like-me.json already exists:
 
 - Load it. Tell the user in one line when it was last updated and how many answers and which writing exercises it holds.
-- Re-run both scripts. For code, compare the new suggestions to the stored answers. Where a high confidence suggestion disagrees with a stored answer, show both and ask which to keep. Everything else keeps the stored answer, don't re-ask settled questions.
+- Re-run both scripts, passing the stored samplePaths to --samples if there are any. For code, compare the new suggestions to the stored answers. Where a high confidence suggestion disagrees with a stored answer, show both and ask which to keep. Everything else keeps the stored answer, don't re-ask settled questions.
 - For writing, check if there's new evidence since updatedAt (git log --author=<email> --since=<updatedAt> --oneline). If there's a meaningful amount, re-analyze with the rubric and diff the new report against the stored one field by field. Show only the fields that changed and ask whether to take the new wording. If there's nothing new, keep the stored report and say so.
 - Answer any questions that were never answered the first time, same rules as step 4.
 - Rewrite the write-like-me sections in the target file(s) between the markers, keep createdAt, bump updatedAt, write the sidecar.

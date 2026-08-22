@@ -27,9 +27,10 @@ Codex, opencode, others: see adapters/. The skill is just a SKILL.md, some json 
 
 1. Looks for an existing .write-like-me.json and asks which file(s) to write to
 2. Runs scripts/analyze-code.mjs over your files for comment density, function length, naming, acronym casing
-3. Runs scripts/collect-writing.mjs to pull your commit messages, docs, comments and docstrings out of git, filtered to you when the repo has other authors
-4. Reads that and drafts the profile, then asks only the questions it couldn't answer, usually 5 or 6 not 14
-5. Writes the profile and saves .write-like-me.json so you can refresh later
+3. Runs scripts/collect-writing.mjs to pull your commit messages, docs, comments and docstrings out of git, filtered to you when the repo has other authors, with AI co-authored commits dropped
+4. Asks how much of that is really yours. If the repo is mostly AI written you can paste your own writing, point it at a file or folder (samples=path), or do a couple of short exercises instead
+5. Reads that and drafts the profile, then asks only the questions it couldn't answer, usually 5 or 6 not 14
+6. Writes the profile and saves .write-like-me.json so you can refresh later
 
 No API keys, no network calls. The agent running the skill is the analyzer.
 
