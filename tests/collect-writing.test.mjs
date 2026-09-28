@@ -151,3 +151,16 @@ test('cli fails cleanly outside a git repo and on bad flags', () => {
     assert.throws(() => execFileSync('node', [SCRIPT, dir], { stdio: 'pipe' }), (e) => e.status === 1 && /not a git repo/.test(e.stderr));
     assert.throws(() => execFileSync('node', [SCRIPT, '--nope'], { stdio: 'pipe' }), (e) => e.status === 2);
 });
+
+test('samples strip html comments and show a word count', () => {
+    const dir = makeRepo();
+    const sdir = mkdtempSync(join(tmpdir(), 'wlm-samples-'));
+    writeFileSync(join(sdir, 'chat.md'), '<!--\nwrite-like-me: Chat\nWrite below\n-->\n\nok so. found it. was the timezone thing\n');
+    writeFileSync(join(sdir, 'empty.md'), '<!-- write-like-me: nothing here -->\n\n');
+    const got = collectSamples([sdir]);
+    assert.equal(got.length, 1);
+    assert.equal(got[0].text, 'ok so. found it. was the timezone thing');
+    assert.equal(got[0].words, 8);
+    const r = buildReport({ repo: dir, author: 'me@example.com', samples: [sdir], maxWords: 4000, json: true, blame: false, keepAi: false });
+    assert.ok(renderText(r).includes('chat.md (8 words)'));
+});

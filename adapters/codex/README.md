@@ -13,6 +13,6 @@ Then in Codex type $write-like-me, or just ask it to capture your style and it s
 
 Codex has a structured question tool called request_user_input. It is reliable in Plan mode and may need a flag in Default mode (features.default_mode_request_user_input = true in ~/.codex/config.toml). If the call fails the skill falls back to numbered options in chat, same as anywhere else.
 
-Codex reads AGENTS.md from the repo root down to your cwd, and ~/.codex/AGENTS.md globally. It doesn't read CLAUDE.md on its own, so either pick AGENTS.md as the target when the skill asks, or add "CLAUDE.md" to project_doc_fallback_filenames in ~/.codex/config.toml.
+The skill writes the profile into ~/.codex/AGENTS.md, which Codex reads for every project, so one setup covers all your repos. Codex also reads AGENTS.md from the repo root down to your cwd if you ever want a per repo copy, name the path when the skill asks. Project docs are capped at 32 KiB combined, the profile is well under that.
 
 Docs: https://learn.chatgpt.com/docs/build-skills and https://learn.chatgpt.com/docs/agent-configuration/agents-md

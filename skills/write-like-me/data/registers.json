@@ -1,0 +1,66 @@
+[
+  {
+    "id": "technical",
+    "label": "Technical explanation",
+    "description": "Explaining a concept, a design or a bug to another engineer. Design docs, wiki pages, review comments, answers in a thread.",
+    "kind": "prose",
+    "minWords": 80,
+    "exercises": ["explain-concept"]
+  },
+  {
+    "id": "docs",
+    "label": "README and docs",
+    "description": "Public facing project writing. README intros, install steps, changelogs, API docs.",
+    "kind": "prose",
+    "minWords": 80,
+    "exercises": ["readme-intro"]
+  },
+  {
+    "id": "academic",
+    "label": "Academic or formal",
+    "description": "Papers, reports, essays for a class, anything with a grade or a reviewer on the other end.",
+    "kind": "prose",
+    "minWords": 120,
+    "exercises": ["academic-paragraph"]
+  },
+  {
+    "id": "essay",
+    "label": "Essay or opinion",
+    "description": "Blog posts, opinion pieces, longer personal writing where you argue for something.",
+    "kind": "prose",
+    "minWords": 120,
+    "exercises": ["essay-opinion"]
+  },
+  {
+    "id": "social",
+    "label": "Social posts",
+    "description": "Public short form. X, Bluesky, Mastodon, LinkedIn, Reddit, HN comments.",
+    "kind": "prose",
+    "minWords": 40,
+    "exercises": ["social-post"]
+  },
+  {
+    "id": "chat",
+    "label": "Chat and DMs",
+    "description": "Slack, Discord, Teams, texts. Team channels and one on one.",
+    "kind": "prose",
+    "minWords": 40,
+    "exercises": ["casual-update", "dm-ask"]
+  },
+  {
+    "id": "email",
+    "label": "Email",
+    "description": "Work and school email. Asking for something, replying, following up.",
+    "kind": "prose",
+    "minWords": 60,
+    "exercises": ["email-request"]
+  },
+  {
+    "id": "code",
+    "label": "Code documentation",
+    "description": "Docstrings, inline comments, commit messages and PR descriptions.",
+    "kind": "code-doc",
+    "minWords": 80,
+    "exercises": ["docstring", "inline-comments", "commit-and-pr"]
+  }
+]

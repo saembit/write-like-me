@@ -9,7 +9,7 @@
       "name": "write-like-me",
       "source": "./",
       "description": "Capture how you write code, comments and docs so agents write like you. Infers from your repo first, asks only what it can't tell.",
-      "version": "0.1.1",
+      "version": "0.2.0",
       "category": "productivity",
       "keywords": ["style", "voice", "profile", "claude-md", "agents-md", "cursorrules"]
     }

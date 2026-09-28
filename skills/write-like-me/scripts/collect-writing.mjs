@@ -8,7 +8,7 @@
  **/
 import { execFileSync } from 'node:child_process';
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
-import { join, extname, resolve } from 'node:path';
+import { join, extname, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 // Extensions whose comments are worth reading
@@ -149,11 +149,43 @@ function collectCommits(repo, author, keepAi = false) {
     return { commits: out, aiSkipped };
 }
 
+// Html comments in samples are the prompts scaffold-samples.mjs writes, not the user's words
+const HTML_COMMENT_RE = /<!--[\s\S]*?-->/g;
+// The code snippets the exercises ship with, an untouched one in a sample isn't the user's writing either
+const EXERCISE_MATERIALS = loadExerciseMaterials();
+
+/**
+ * loadExerciseMaterials
+ * Reads the material field off data/exercises.json next to this script, empty list if it's missing
+ * @return {string[]}
+ **/
+function loadExerciseMaterials() {
+    try {
+        const p = join(dirname(fileURLToPath(import.meta.url)), '..', 'data', 'exercises.json');
+        return JSON.parse(readFileSync(p, 'utf8')).map((e) => e.material).filter(Boolean);
+    } catch {
+        return [];
+    }
+}
+
+/**
+ * stripScaffold
+ * Removes prompt comments and untouched exercise snippets, what's left is what the user wrote
+ * @param raw {string}
+ * @return {string}
+ **/
+function stripScaffold(raw) {
+    // Editors that save with CRLF would otherwise stop an untouched snippet from matching
+    const noComments = raw.replace(/\r\n/g, '\n').replace(HTML_COMMENT_RE, '');
+    return EXERCISE_MATERIALS.reduce((s, m) => s.split('```\n' + m + '\n```').join(''), noComments);
+}
+
 /**
  * collectSamples
- * Reads files the user handed over as their own writing, a file or a dir of files, text only
+ * Reads files the user handed over as their own writing, a file or a dir of files, text only.
+ * Html comments are stripped so the exercise prompts don't get analyzed as theirs
  * @param paths {string[]}
- * @return {{path: string, text: string}[]}
+ * @return {{path: string, text: string, words: number}[]}
  **/
 function collectSamples(paths) {
     const out = [];
@@ -171,10 +203,12 @@ function collectSamples(paths) {
             return;
         }
         if (st.size > MAX_FILE_BYTES) return;
-        const text = readFileSync(p, 'utf8');
+        const raw = readFileSync(p, 'utf8');
         // Skip anything that looks binary
-        if (text.includes('\u0000')) return;
-        if (text.trim()) out.push({ path: p, text: text.trim() });
+        if (raw.includes('\u0000')) return;
+        // Drop the prompt comments and untouched snippets, what's left is what they wrote
+        const text = stripScaffold(raw).trim();
+        if (text) out.push({ path: p, text, words: countWords(text) });
     };
     for (const p of paths) walk(p);
     return out;
@@ -439,7 +473,7 @@ function renderText(r) {
         lines.push(`==== Samples handed over by the user (${r.samples.length}) ====`);
         lines.push('');
         for (const smp of r.samples) {
-            lines.push(`--- ${smp.path}`);
+            lines.push(`--- ${smp.path} (${smp.words} words)`);
             lines.push(smp.text);
             lines.push('');
         }
