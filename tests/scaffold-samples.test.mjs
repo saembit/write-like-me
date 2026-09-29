@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, writeFileSync, existsSync, appendFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, writeFileSync, existsSync, appendFileSync, symlinkSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { renderRegisterFile, scaffold, loadData, COMMENT_TAG } from '../skills/write-like-me/scripts/scaffold-samples.mjs';
@@ -86,4 +86,20 @@ test('cli writes with --home or WRITE_LIKE_ME_HOME, lists registers, fails on ba
     const envHome = tmpHome();
     const out2 = execFileSync('node', [SCRIPT, 'email'], { encoding: 'utf8', env: { ...process.env, WRITE_LIKE_ME_HOME: envHome } });
     assert.ok(out2.includes(join(envHome, 'samples', 'email.md')));
+});
+
+test('every script still runs as main when invoked through a symlink', () => {
+    // ~/.claude/skills/write-like-me is usually a symlink to the repo, argv[1] then differs from import.meta.url
+    const linkDir = mkdtempSync(join(tmpdir(), 'wlm-link-'));
+    const scriptsDir = new URL('../skills/write-like-me/scripts/', import.meta.url).pathname;
+    const repo = new URL('..', import.meta.url).pathname;
+    for (const name of ['scaffold-samples.mjs', 'analyze-code.mjs', 'collect-writing.mjs']) {
+        symlinkSync(join(scriptsDir, name), join(linkDir, name));
+    }
+    const list = execFileSync('node', [join(linkDir, 'scaffold-samples.mjs'), '--list'], { encoding: 'utf8' });
+    assert.ok(list.includes('Chat and DMs'), 'scaffold ran through the symlink');
+    const code = execFileSync('node', [join(linkDir, 'analyze-code.mjs'), scriptsDir, '--json'], { encoding: 'utf8' });
+    assert.ok(code.includes('"suggestions"'), 'analyze-code ran through the symlink');
+    const writing = execFileSync('node', [join(linkDir, 'collect-writing.mjs'), repo], { encoding: 'utf8' });
+    assert.ok(writing.startsWith('==== write-like-me'), 'collect-writing ran through the symlink');
 });

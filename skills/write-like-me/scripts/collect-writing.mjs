@@ -7,7 +7,7 @@
  * Zero dependencies, needs git on the path.
  **/
 import { execFileSync } from 'node:child_process';
-import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync, statSync, realpathSync } from 'node:fs';
 import { join, extname, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -533,6 +533,21 @@ function main() {
 
 export { extractComments, collectCommits, collectSamples, looksAi, buildReport, renderText, countWords };
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+/**
+ * isMain
+ * True when this file is the script node was started with, through a symlink or not.
+ * argv[1] keeps the symlink path while import.meta.url is the real one, so compare real paths
+ * @return {boolean}
+ **/
+function isMain() {
+    if (!process.argv[1]) return false;
+    try {
+        return realpathSync(process.argv[1]) === fileURLToPath(import.meta.url);
+    } catch {
+        return false;
+    }
+}
+
+if (isMain()) {
     main();
 }

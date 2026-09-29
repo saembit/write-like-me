@@ -8,7 +8,7 @@
  * Usage: node scaffold-samples.mjs [register ...] [--home=<dir>] [--force] [--list]
  * Home is $WRITE_LIKE_ME_HOME or ~/.write-like-me. No registers means all of them.
  **/
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, realpathSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
 import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -152,7 +152,22 @@ function main(argv) {
     }
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+/**
+ * isMain
+ * True when this file is the script node was started with, through a symlink or not.
+ * argv[1] keeps the symlink path while import.meta.url is the real one, so compare real paths
+ * @return {boolean}
+ **/
+function isMain() {
+    if (!process.argv[1]) return false;
+    try {
+        return realpathSync(process.argv[1]) === fileURLToPath(import.meta.url);
+    } catch {
+        return false;
+    }
+}
+
+if (isMain()) {
     process.exit(main(process.argv.slice(2)));
 }
 
